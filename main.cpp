@@ -19,7 +19,7 @@ int main() {
         int fps = (int) (frames / fpsClock.getElapsedTime().asSeconds());
 
         sf::Event e{};
-        window->setTitle("Packmans! ~ [" + std::to_string(fps) + "FPS]");
+        window->setTitle("Packmans! ~ [" + std::to_string(fps) + "FPS] [" + std::to_string(packmans.size()) + "]");
 
         while (window->pollEvent(e)) {
 
@@ -29,7 +29,8 @@ int main() {
 
 
             if (e.type == sf::Event::MouseButtonPressed) {
-                packmans.push_back(new Packman(sf::Vector2f(sf::Mouse::getPosition(*window).x, sf::Mouse::getPosition(*window).y)));
+                packmans.push_back(new Packman(
+                        sf::Vector2f(sf::Mouse::getPosition(*window).x, sf::Mouse::getPosition(*window).y)));
             }
         }
 

@@ -11,9 +11,12 @@ class Packman {
 protected:
     sf::Vector2f position;
     States state;
-    sf::VertexArray verticies;
+
+    int currentFrame = 0;
+    sf::VertexArray vertexFrames [3];
     sf::Clock clock;
-    int animationResolution = 100;
+
+    int animationResolution = 500;
 public:
     const sf::Vector2f &getPosition() const;
 

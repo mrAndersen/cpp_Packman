@@ -10,31 +10,51 @@ void Packman::setPosition(const sf::Vector2f &position) {
 }
 
 void Packman::draw(sf::RenderWindow &window) {
-//    sf::Transform transform;
-//
-//    transform.rotate(90);
+    sf::Transform transform;
 
-    window.draw(verticies);
+    if (clock.getElapsedTime().asMilliseconds() == animationResolution) {
+        clock.restart();
+        currentFrame = (currentFrame == 2) ? 0 : currentFrame + 1;
+    }
+
+    window.draw(vertexFrames[currentFrame], transform);
 }
 
 Packman::Packman(sf::Vector2f position) {
     setPosition(position);
 
-    int detalization = 20;
+    int detalization = 180;
     int radius = 15;
     float degreeStep = 360 / detalization;
 
-    verticies.append(sf::Vertex(position, sf::Color::Yellow));
-    verticies.setPrimitiveType(sf::TriangleFan);
+    for (int k = 0; k < 3; ++k) {
+        vertexFrames[k].append(sf::Vertex(position, sf::Color::Yellow));
+        vertexFrames[k].setPrimitiveType(sf::TriangleFan);
 
-    for (int i = 0; i < detalization; ++i) {
-        auto rad = degreeStep * i * M_PI / 180.f;
+        for (int i = 0; i < detalization; ++i) {
+            auto rad = degreeStep * i * M_PI / 180.f;
+            bool mouthCondition = false;
 
-        if (degreeStep * i > 22.5 && degreeStep * i < 337.5) {
-            verticies.append(sf::Vertex(
-                    sf::Vector2f(position.x + (float) std::cos(rad) * radius,
-                                 position.y + (float) std::sin(rad) * radius),
-                    sf::Color::Yellow));
+            switch (k) {
+                case 0:
+                    mouthCondition = degreeStep * i >= 22.5 && degreeStep * i <= 337.5;
+                    break;
+                case 1:
+                    mouthCondition = degreeStep * i >= 11.25 && degreeStep * i <= 348.75;
+                    break;
+                case 2:
+                    mouthCondition = degreeStep * i >= 0 && degreeStep * i <= 360;
+                    break;
+                default:
+                    break;
+            }
+
+            if (mouthCondition) {
+                vertexFrames[k].append(sf::Vertex(
+                        sf::Vector2f(position.x + (float) std::cos(rad) * radius,
+                                     position.y + (float) std::sin(rad) * radius),
+                        sf::Color::Yellow));
+            }
         }
     }
 
