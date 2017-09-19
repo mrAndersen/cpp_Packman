@@ -6,7 +6,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
 endif()
 
-project(the_corp_game)
+project(pwar)
 
 set(SFML_ROOT "${PROJECT_SOURCE_DIR}/vendor/mingw_sfml-2.4.2")
 include_directories("${PROJECT_SOURCE_DIR}/src")
@@ -14,8 +14,8 @@ include_directories("${PROJECT_SOURCE_DIR}/src")
 file(COPY "resources" DESTINATION "${CMAKE_BINARY_DIR}")
 
 # Set version information in a config.h file
-set(the_corp_game_VERSION_MAJOR 1)
-set(the_corp_game_VERSION_MINOR 0)
+set(pwar_VERSION_MAJOR 1)
+set(pwar_VERSION_MINOR 0)
 
 configure_file(
         "${PROJECT_SOURCE_DIR}/config.h.in"
@@ -24,11 +24,15 @@ configure_file(
 include_directories("${PROJECT_BINARY_DIR}")
 
 # Define sources and executable
-set(EXECUTABLE_NAME "corpgame")
+set(EXECUTABLE_NAME "pwar")
 add_executable(
         ${EXECUTABLE_NAME} WIN32 main.cpp
 
-        src/Packman.cpp src/Packman.h src/States.h)
+        src/Packman.cpp
+        src/Packman.h
+
+        src/States.h
+        src/Pwar.h src/Pwar.cpp)
 
 # Detect and add SFML
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
@@ -42,7 +46,6 @@ if(SFML_FOUND)
 
     include_directories(${SFML_INCLUDE_DIR})
     target_link_libraries(${EXECUTABLE_NAME} ${PSAPI} ${SFML_LIBRARIES} ${SFML_DEPENDENCIES} -static-libgcc -static-libstdc++)
-#    target_link_libraries(${EXECUTABLE_NAME} PUBLIC )
 endif()
 
 
@@ -52,6 +55,6 @@ install(TARGETS ${EXECUTABLE_NAME} DESTINATION bin)
 # CPack packaging
 include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
-set(CPACK_PACKAGE_VERSION_MAJOR "${the_corp_game_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${the_corp_game_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_MAJOR "${pwar_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${pwar_VERSION_MINOR}")
 include(CPack)

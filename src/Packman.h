@@ -4,6 +4,7 @@
 
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics.hpp>
 #include <States.h>
 #include <SFML/Graphics/VertexArray.hpp>
 
@@ -13,16 +14,34 @@ protected:
     States state;
 
     int currentFrame = 0;
-    sf::VertexArray vertexFrames [3];
-    sf::Clock clock;
+    static const int frameCount = 4;
 
-    int animationResolution = 500;
+    sf::VertexArray vertexFrames [frameCount];
+    sf::Text strengthText;
+
+    sf::Clock clock;
+    sf::Clock frameTime;
+
+    int detalization = 50;
+    int animationResolution = 100;
+
+
+    int radius = 10;
+    int speed = 100;
+    int strength = 2;
+
+    void updateVertexCoordinates();
+
 public:
     const sf::Vector2f &getPosition() const;
 
     void setPosition(const sf::Vector2f &position);
 
-    void draw(sf::RenderWindow &window);
+    void draw(sf::RenderWindow &window, sf::Font &font);
+
+    void update(sf::RenderWindow &window, sf::Font &font);
+
+    void updateLogic();
 
     explicit Packman(sf::Vector2f position);
 };
