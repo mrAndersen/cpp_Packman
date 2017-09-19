@@ -1,0 +1,2 @@
+#define the_corp_game_VERSION_MAJOR @the_corp_game_VERSION_MAJOR
+#define the_corp_game_VERSION_MINOR @the_corp_game_VERSION_MINOR
