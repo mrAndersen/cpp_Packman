@@ -26,7 +26,7 @@ void Packman::draw(sf::RenderWindow &window, sf::Font &font) {
     strengthText.setPosition(position);
     strengthText.setString(std::to_string(strength));
     strengthText.setPosition(position);
-    strengthText.setOrigin(sf::Vector2f(3, radius + 14));
+    strengthText.setOrigin(sf::Vector2f(3, radius + 20));
 
     window.draw(strengthText);
     window.draw(vertexFrames[currentFrame], transform);
@@ -35,11 +35,15 @@ void Packman::draw(sf::RenderWindow &window, sf::Font &font) {
 void Packman::updateLogic() {
     if (prey) {
         angle = angleToPrey();
-        speed = 100;
 
         if (distanceToPrey(prey) <= radius + prey->radius) {
             //catched
-            speed = 0;
+            speed = speed - 1;
+
+            if (speed <= 0) {
+                speed = 0;
+            }
+
             strength += 1;
 
             pWar::remove(prey);
@@ -133,7 +137,7 @@ Packman::Packman(sf::Vector2f position, int strength) {
     state = States::Living;
 
     strengthText.setFillColor(sf::Color::White);
-    strengthText.setCharacterSize(10);
+    strengthText.setCharacterSize(16);
 
     updateVertexCoordinates();
 }
@@ -175,6 +179,7 @@ void Packman::detectPrey() {
             });
 
             prey = targets[0];
+            targets[0]->hunter = this;
         }
     }
 }

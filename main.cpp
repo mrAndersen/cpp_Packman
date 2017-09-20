@@ -6,7 +6,7 @@
 
 int main() {
     pWar::openSans.loadFromFile("resources/open-sans.ttf");
-    const_cast<sf::Texture &>(pWar::openSans.getTexture(10)).setSmooth(true);
+    const_cast<sf::Texture &>(pWar::openSans.getTexture(16)).setSmooth(true);
 
 
     sf::Clock fpsClock;

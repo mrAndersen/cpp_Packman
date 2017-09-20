@@ -28,11 +28,12 @@ protected:
 
 
     float radius;
-    int speed = 0;
+    int speed = 200;
     int strength = 5;
     float visionRadius = 350;
 
     Packman *prey = nullptr;
+    Packman *hunter = nullptr;
 
     void updateVertexCoordinates();
 
