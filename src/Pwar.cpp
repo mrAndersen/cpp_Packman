@@ -7,11 +7,12 @@
 namespace pWar {
     sf::RenderWindow *window;
 
-    int screenWidth = 1600;
-    int screenHeight = 600;
+    int screenWidth = 1920;
+    int screenHeight = 1080;
 
     sf::Font openSans;
     std::list<Packman *> packmans;
+    sf::Texture packmanTexture;
 
     int rnd(int min, int max) {
         static bool first = true;

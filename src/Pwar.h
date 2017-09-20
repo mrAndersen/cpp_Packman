@@ -12,9 +12,11 @@ namespace pWar {
 
     extern sf::Font openSans;
     extern std::list<Packman *> packmans;
+    extern sf::Texture packmanTexture;
 
     int rnd(int min, int max);
 
     void remove(Packman *item);
+
 }
 #endif //PWAR_PWAR_H

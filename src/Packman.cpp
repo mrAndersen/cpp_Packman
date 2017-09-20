@@ -11,25 +11,38 @@ void Packman::setPosition(const sf::Vector2f &position) {
 }
 
 void Packman::draw(sf::RenderWindow &window, sf::Font &font) {
-    radius = strength * 1.2f;
-
-    sf::Transform transform;
-    transform.rotate(angle, position);
-
+    radius = strength * 1.1f;
 
     if (clock.getElapsedTime().asMilliseconds() >= animationResolution) {
         clock.restart();
         currentFrame = (currentFrame == (frameCount - 1)) ? 0 : currentFrame + 1;
     }
 
+    sprite.setTextureRect(frames[currentFrame]);
+    sprite.setScale(radius / 44, radius / 44);
+    sprite.setPosition(position);
+    sprite.setRotation(angle);
+    sprite.setColor(color);
+    window.draw(sprite);
+
     strengthText.setFont(font);
     strengthText.setPosition(position);
     strengthText.setString(std::to_string(strength));
-    strengthText.setPosition(position);
-    strengthText.setOrigin(sf::Vector2f(3, radius + 20));
-
+    strengthText.setOrigin(sf::Vector2f(5, radius + 20));
     window.draw(strengthText);
-    window.draw(vertexFrames[currentFrame], transform);
+
+
+    sf::VertexArray quad;
+    quad.setPrimitiveType(sf::LineStrip);
+    quad.resize(5);
+
+//    quad[0].position = sf::Vector2f(position.x - radius, position.y - radius);
+//    quad[1].position = sf::Vector2f(position.x + radius, position.y - radius);
+//    quad[2].position = sf::Vector2f(position.x + radius, position.y + radius);
+//    quad[3].position = sf::Vector2f(position.x - radius, position.y + radius);
+//    quad[4].position = sf::Vector2f(position.x - radius, position.y - radius);
+//
+//    window.draw(quad);
 }
 
 void Packman::updateLogic() {
@@ -38,15 +51,14 @@ void Packman::updateLogic() {
 
         if (distanceToPrey(prey) <= radius + prey->radius) {
             //catched
-            speed = speed - 1;
-
-            if (speed <= 0) {
-                speed = 0;
-            }
-
+            speed = speed + 3;
             strength += 1;
 
             pWar::remove(prey);
+
+            if (pWar::packmans.size() == 1) {
+                speed = 0;
+            }
         }
     } else {
         detectPrey();
@@ -58,9 +70,9 @@ void Packman::updateLogic() {
     position.x = position.x + (float) std::cos(rad) * frameDistance;
     position.y = position.y + (float) std::sin(rad) * frameDistance;
 
+    visionRadius = visionRadius + radius;
 
     correctWindowBoundaries();
-    updateVertexCoordinates();
 }
 
 void Packman::correctWindowBoundaries() {
@@ -81,65 +93,27 @@ void Packman::correctWindowBoundaries() {
     }
 }
 
-void Packman::updateVertexCoordinates() {
-    float degreeStep = 360 / detalization;
-
-    for (int k = 0; k < frameCount; ++k) {
-        vertexFrames[k].setPrimitiveType(sf::TriangleFan);
-        vertexFrames[k].resize(1);
-
-        vertexFrames[k][0].position = position;
-        vertexFrames[k][0].color = sf::Color::White;
-
-        for (int i = 1; i < detalization; ++i) {
-            auto rad = degreeStep * i * M_PI / 180.f;
-            bool mouthCondition = false;
-
-            switch (k) {
-                case 0:
-                    mouthCondition = degreeStep * i >= 45 && degreeStep * i <= 315;
-                    break;
-                case 1:
-                    mouthCondition = degreeStep * i >= 22.5 && degreeStep * i <= 337.5;
-                    break;
-                case 2:
-                    mouthCondition = degreeStep * i >= 11.25 && degreeStep * i <= 348.75;
-                    break;
-                case 3:
-                    mouthCondition = true;
-                    break;
-                default:
-                    break;
-            }
-
-            if (mouthCondition) {
-                vertexFrames[k].resize(i + 1);
-                vertexFrames[k][i].position = sf::Vector2f(position.x + (float) std::cos(rad) * radius,
-                                                           position.y + (float) std::sin(rad) * radius);
-                vertexFrames[k][i].color = sf::Color::Yellow;
-            }
-        }
-
-        //Shitty hack
-        for (int j = 0; j < vertexFrames[k].getVertexCount(); ++j) {
-            if (vertexFrames[k][j].position.x == 0 || vertexFrames[k][j].position.y == 0) {
-                vertexFrames[k][j].position = position;
-                vertexFrames[k][j].color = sf::Color::White;
-            }
-        }
-    }
-}
-
 Packman::Packman(sf::Vector2f position, int strength) {
+
+    sprite.setTexture(pWar::packmanTexture);
+
     setPosition(position);
     setStrength(strength);
 
+    sprite.setOrigin(radius, radius);
+
+    for (int i = 0; i < frameCount; ++i) {
+        sf::IntRect rect(i * 85, 0, 85, 85);
+        frames.push_back(rect);
+    }
+
+    sprite.setTextureRect(frames[0]);
+
+    angle = pWar::rnd(0, 359);
     state = States::Living;
 
     strengthText.setFillColor(sf::Color::White);
     strengthText.setCharacterSize(16);
-
-    updateVertexCoordinates();
 }
 
 void Packman::update(sf::RenderWindow &window, sf::Font &font) {
@@ -179,7 +153,6 @@ void Packman::detectPrey() {
             });
 
             prey = targets[0];
-            targets[0]->hunter = this;
         }
     }
 }
@@ -209,6 +182,20 @@ void Packman::setPrey(Packman *prey) {
     Packman::prey = prey;
 }
 
+int Packman::getSpeed() const {
+    return speed;
+}
 
+void Packman::setSpeed(int speed) {
+    Packman::speed = speed;
+}
+
+const sf::Color &Packman::getColor() const {
+    return color;
+}
+
+void Packman::setColor(const sf::Color &color) {
+    Packman::color = color;
+}
 
 

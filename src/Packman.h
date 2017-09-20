@@ -14,28 +14,25 @@ protected:
     States state;
 
     int currentFrame = 0;
-    static const int frameCount = 4;
-
-    sf::VertexArray vertexFrames[frameCount];
+    int frameCount = 5;
+    std::vector<sf::IntRect> frames = {};
     sf::Text strengthText;
+    sf::Sprite sprite;
 
     sf::Clock clock;
     sf::Clock frameTime;
 
-    int detalization = 180;
     int animationResolution = 100;
-    float angle = 60;
+    float angle = 0;
 
 
-    float radius;
+    float radius = 45.2;
     int speed = 200;
     int strength = 5;
     float visionRadius = 350;
+    sf::Color color = sf::Color::Yellow;
 
     Packman *prey = nullptr;
-    Packman *hunter = nullptr;
-
-    void updateVertexCoordinates();
 
     void correctWindowBoundaries();
 
@@ -46,6 +43,14 @@ protected:
     void detectPrey();
 
 public:
+    const sf::Color &getColor() const;
+
+    void setColor(const sf::Color &color);
+
+    int getSpeed() const;
+
+    void setSpeed(int speed);
+
     const sf::Vector2f &getPosition() const;
 
     void setPosition(const sf::Vector2f &position);
