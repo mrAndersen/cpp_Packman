@@ -11,11 +11,12 @@ int main() {
 
     sf::Clock fpsClock;
     sf::Clock generatorClock;
+    sf::Clock sortClock;
     int frames = 0;
 
     pWar::window = new sf::RenderWindow(sf::VideoMode(pWar::screenWidth, pWar::screenHeight), "PWar!",
                                         sf::Style::Fullscreen);
-    pWar::window->clear(sf::Color::Black);
+    pWar::window->clear(sf::Color::White);
     pWar::window->setFramerateLimit(500);
 
     bool startedSession = false;
@@ -54,29 +55,35 @@ int main() {
             if (generatorClock.getElapsedTime().asMilliseconds() >= 50) {
                 generatorClock.restart();
 
-                auto *pack = new Packman(
-                        sf::Vector2f(pWar::rnd(0, pWar::screenWidth), pWar::rnd(0, pWar::screenHeight)),
-                        pWar::rnd(5, 10));
-                pWar::packmans.push_back(pack);
-
-                pWar::packmans.sort([&](Packman *a, Packman *b) -> bool {
-                    return a->getStrength() > b->getStrength();
-                });
-
-                strongest = pWar::packmans.front();
-
-                pWar::packmans.sort([&](Packman *a, Packman *b) -> bool {
-                    return a->getSpeed() > b->getSpeed();
-                });
-
-                fastest = pWar::packmans.front();
+                for (int i = 0; i < 20; ++i) {
+                    auto *pack = new Packman(
+                            sf::Vector2f(pWar::rnd(0, pWar::screenWidth), pWar::rnd(0, pWar::screenHeight)),
+                            pWar::rnd(5, 10));
+                    pWar::packmans.push_back(pack);
+                }
             }
         }
+
+        if(sortClock.getElapsedTime().asMilliseconds() >= 1000){
+            pWar::packmans.sort([&](Packman *a, Packman *b) -> bool {
+                return a->getStrength() > b->getStrength();
+            });
+
+            strongest = pWar::packmans.front();
+
+            pWar::packmans.sort([&](Packman *a, Packman *b) -> bool {
+                return a->getSpeed() > b->getSpeed();
+            });
+
+            fastest = pWar::packmans.front();
+        }
+
+
 
         dString["d_fps"] = sf::Text("fps:" + std::to_string(fps), pWar::openSans, 14);
         dString["d_count"] = sf::Text("count:" + std::to_string(pWar::packmans.size()), pWar::openSans, 14);
 
-        if (!pWar::packmans.empty()) {
+        if (strongest && fastest) {
             dString["d_strongest"] = sf::Text("strongest:" + std::to_string(strongest->getStrength()), pWar::openSans, 14);
             dString["d_fastest"] = sf::Text("fastest:" + std::to_string(fastest->getSpeed()), pWar::openSans, 14);
         }
@@ -86,7 +93,7 @@ int main() {
             strongest->setColor(sf::Color::Blue);
         }
 
-        pWar::window->clear();
+        pWar::window->clear(sf::Color::White);
 
         for (auto p:pWar::packmans) {
             p->update(*pWar::window, pWar::openSans);

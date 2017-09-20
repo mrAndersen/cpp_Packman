@@ -51,8 +51,9 @@ void Packman::updateLogic() {
 
         if (distanceToPrey(prey) <= radius + prey->radius) {
             //catched
-            speed = speed + 3;
+            speed += 5;
             strength += 1;
+            kills++;
 
             pWar::remove(prey);
 
@@ -71,6 +72,8 @@ void Packman::updateLogic() {
     position.y = position.y + (float) std::sin(rad) * frameDistance;
 
     visionRadius = visionRadius + radius;
+    color = sf::Color(kills, kills*2, kills);
+
 
     correctWindowBoundaries();
 }

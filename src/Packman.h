@@ -31,6 +31,7 @@ protected:
     int strength = 5;
     float visionRadius = 350;
     sf::Color color = sf::Color::Yellow;
+    int kills = 0;
 
     Packman *prey = nullptr;
 
