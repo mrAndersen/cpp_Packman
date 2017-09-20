@@ -16,21 +16,33 @@ protected:
     int currentFrame = 0;
     static const int frameCount = 4;
 
-    sf::VertexArray vertexFrames [frameCount];
+    sf::VertexArray vertexFrames[frameCount];
     sf::Text strengthText;
 
     sf::Clock clock;
     sf::Clock frameTime;
 
-    int detalization = 50;
+    int detalization = 180;
     int animationResolution = 100;
+    float angle = 60;
 
 
-    int radius = 10;
-    int speed = 100;
-    int strength = 2;
+    float radius;
+    int speed = 0;
+    int strength = 5;
+    float visionRadius = 350;
+
+    Packman *prey = nullptr;
 
     void updateVertexCoordinates();
+
+    void correctWindowBoundaries();
+
+    float angleToPrey();
+
+    float distanceToPrey(Packman *packman);
+
+    void detectPrey();
 
 public:
     const sf::Vector2f &getPosition() const;
@@ -43,7 +55,15 @@ public:
 
     void updateLogic();
 
-    explicit Packman(sf::Vector2f position);
+    int getStrength() const;
+
+    void setStrength(int strength);
+
+    explicit Packman(sf::Vector2f position, int strength);
+
+    Packman *getPrey() const;
+
+    void setPrey(Packman *prey);
 };
 
 

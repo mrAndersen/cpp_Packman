@@ -11,32 +11,55 @@ void Packman::setPosition(const sf::Vector2f &position) {
 }
 
 void Packman::draw(sf::RenderWindow &window, sf::Font &font) {
-    sf::Transform transform;
+    radius = strength * 1.2f;
 
-//    transform.scale(-1.f, 1.f, position.x, position.y);
+    sf::Transform transform;
+    transform.rotate(angle, position);
+
 
     if (clock.getElapsedTime().asMilliseconds() >= animationResolution) {
         clock.restart();
         currentFrame = (currentFrame == (frameCount - 1)) ? 0 : currentFrame + 1;
     }
 
-    window.draw(vertexFrames[currentFrame], transform);
-
     strengthText.setFont(font);
     strengthText.setPosition(position);
     strengthText.setString(std::to_string(strength));
     strengthText.setPosition(position);
+    strengthText.setOrigin(sf::Vector2f(3, radius + 14));
 
     window.draw(strengthText);
+    window.draw(vertexFrames[currentFrame], transform);
 }
 
 void Packman::updateLogic() {
-    float frameDistance = speed * frameTime.restart().asSeconds();
+    if (prey) {
+        angle = angleToPrey();
+        speed = 100;
 
-    if (state == States::Living) {
-        position.x += frameDistance;
+        if (distanceToPrey(prey) <= radius + prey->radius) {
+            //catched
+            speed = 0;
+            strength += 1;
+
+            pWar::remove(prey);
+        }
+    } else {
+        detectPrey();
     }
 
+    float frameDistance = speed * frameTime.restart().asSeconds();
+    auto rad = angle * M_PI / 180.f;
+
+    position.x = position.x + (float) std::cos(rad) * frameDistance;
+    position.y = position.y + (float) std::sin(rad) * frameDistance;
+
+
+    correctWindowBoundaries();
+    updateVertexCoordinates();
+}
+
+void Packman::correctWindowBoundaries() {
     if (position.x >= pWar::screenWidth) {
         position.x = 0;
     }
@@ -45,41 +68,26 @@ void Packman::updateLogic() {
         position.y = 0;
     }
 
-    updateVertexCoordinates();
+    if (position.x < 0) {
+        position.x = pWar::screenWidth;
+    }
+
+    if (position.y < 0) {
+        position.y = pWar::screenHeight;
+    }
 }
 
 void Packman::updateVertexCoordinates() {
     float degreeStep = 360 / detalization;
 
     for (int k = 0; k < frameCount; ++k) {
+        vertexFrames[k].setPrimitiveType(sf::TriangleFan);
+        vertexFrames[k].resize(1);
 
         vertexFrames[k][0].position = position;
+        vertexFrames[k][0].color = sf::Color::White;
 
-        for (int i = 1; i < vertexFrames[k].getVertexCount(); ++i) {
-            auto rad = degreeStep * i * M_PI / 180.f;
-
-            vertexFrames[k][i].position = sf::Vector2f(position.x + (float) std::cos(rad) * radius,
-                                                       position.y + (float) std::sin(rad) * radius);
-        }
-    }
-}
-
-Packman::Packman(sf::Vector2f position) {
-    setPosition(position);
-    state = States::Living;
-
-    strengthText.setFillColor(sf::Color::White);
-    strengthText.setCharacterSize(10);
-
-    strengthText.setOrigin(sf::Vector2f(0, radius + 14));
-
-    for (int k = 0; k < frameCount; ++k) {
-        vertexFrames[k].setPrimitiveType(sf::TriangleFan);
-        vertexFrames[k].append(sf::Vertex(position, sf::Color::Yellow));
-
-        float degreeStep = 360 / detalization;
-
-        for (int i = 0; i < detalization; ++i) {
+        for (int i = 1; i < detalization; ++i) {
             auto rad = degreeStep * i * M_PI / 180.f;
             bool mouthCondition = false;
 
@@ -101,17 +109,101 @@ Packman::Packman(sf::Vector2f position) {
             }
 
             if (mouthCondition) {
-                vertexFrames[k].append(sf::Vertex(sf::Vector2f(position.x + (float) std::cos(rad) * radius,
-                                                               position.y + (float) std::sin(rad) * radius),
-                                                  sf::Color::Yellow));
+                vertexFrames[k].resize(i + 1);
+                vertexFrames[k][i].position = sf::Vector2f(position.x + (float) std::cos(rad) * radius,
+                                                           position.y + (float) std::sin(rad) * radius);
+                vertexFrames[k][i].color = sf::Color::Yellow;
+            }
+        }
+
+        //Shitty hack
+        for (int j = 0; j < vertexFrames[k].getVertexCount(); ++j) {
+            if (vertexFrames[k][j].position.x == 0 || vertexFrames[k][j].position.y == 0) {
+                vertexFrames[k][j].position = position;
+                vertexFrames[k][j].color = sf::Color::White;
             }
         }
     }
+}
+
+Packman::Packman(sf::Vector2f position, int strength) {
+    setPosition(position);
+    setStrength(strength);
+
+    state = States::Living;
+
+    strengthText.setFillColor(sf::Color::White);
+    strengthText.setCharacterSize(10);
+
+    updateVertexCoordinates();
 }
 
 void Packman::update(sf::RenderWindow &window, sf::Font &font) {
     updateLogic();
     draw(window, font);
 }
+
+float Packman::angleToPrey() {
+    float angleToPrey = 0;
+
+    if (prey) {
+        angleToPrey = static_cast<float>(std::atan2(prey->position.y - position.y, prey->position.x - position.x) *
+                                         180.f / M_PI);
+    }
+
+    return angleToPrey;
+}
+
+void Packman::detectPrey() {
+    if (!prey) {
+        std::vector<Packman *> targets;
+
+        for (auto potentialPrey:pWar::packmans) {
+            if (distanceToPrey(potentialPrey) <= visionRadius) {
+
+                //sees the prey
+                if (strength > potentialPrey->strength) {
+                    targets.push_back(potentialPrey);
+                }
+            }
+        }
+
+        //selecting closes prey
+        if (!targets.empty()) {
+            std::sort(targets.begin(), targets.end(), [&](Packman *a, Packman *b) -> bool {
+                return distanceToPrey(a) < distanceToPrey(b);
+            });
+
+            prey = targets[0];
+        }
+    }
+}
+
+int Packman::getStrength() const {
+    return strength;
+}
+
+void Packman::setStrength(int strength) {
+    Packman::strength = strength;
+}
+
+float Packman::distanceToPrey(Packman *packman) {
+    if (packman) {
+        return static_cast<float>(std::sqrt(std::pow(packman->position.x - position.x, 2) +
+                                            std::pow(packman->position.y - position.y, 2)));
+    }
+
+    return 0;
+}
+
+Packman *Packman::getPrey() const {
+    return prey;
+}
+
+void Packman::setPrey(Packman *prey) {
+    Packman::prey = prey;
+}
+
+
 
 
