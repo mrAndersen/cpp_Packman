@@ -7,8 +7,8 @@
 namespace pWar {
     sf::RenderWindow *window;
 
-    int screenWidth = 1920;
-    int screenHeight = 1080;
+    int screenWidth = 1600;
+    int screenHeight = 750;
 
     sf::Font openSans;
     std::list<Packman *> packmans;

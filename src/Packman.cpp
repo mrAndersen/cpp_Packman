@@ -72,8 +72,6 @@ void Packman::updateLogic() {
     position.y = position.y + (float) std::sin(rad) * frameDistance;
 
     visionRadius = visionRadius + radius;
-    color = sf::Color(kills, kills*2, kills);
-
 
     correctWindowBoundaries();
 }

@@ -15,8 +15,7 @@ int main() {
     int frames = 0;
 
     pWar::window = new sf::RenderWindow(sf::VideoMode(pWar::screenWidth, pWar::screenHeight), "PWar!",
-                                        sf::Style::Fullscreen);
-    pWar::window->clear(sf::Color::White);
+                                        sf::Style::Close);
     pWar::window->setFramerateLimit(500);
 
     bool startedSession = false;
@@ -55,7 +54,7 @@ int main() {
             if (generatorClock.getElapsedTime().asMilliseconds() >= 50) {
                 generatorClock.restart();
 
-                for (int i = 0; i < 20; ++i) {
+                for (int i = 0; i < 1; ++i) {
                     auto *pack = new Packman(
                             sf::Vector2f(pWar::rnd(0, pWar::screenWidth), pWar::rnd(0, pWar::screenHeight)),
                             pWar::rnd(5, 10));
@@ -93,7 +92,7 @@ int main() {
             strongest->setColor(sf::Color::Blue);
         }
 
-        pWar::window->clear(sf::Color::White);
+        pWar::window->clear(sf::Color::Black);
 
         for (auto p:pWar::packmans) {
             p->update(*pWar::window, pWar::openSans);
